@@ -3,7 +3,7 @@ import * as registroService from '../service/Service_puntaciones';
 import mongoose from 'mongoose';
 import { Intento } from '../models/models_puntaciones';
 import { RequestEventData } from "../models/RequestEventData";
-import  {evento_service }from "../service/evento_service";
+import  {eventoService }from "../service/evento_service";
 
 // Function to create a new record
 export const crearRegistro = async (req: Request, res: Response) => {
@@ -54,7 +54,7 @@ export const obtenerRegistrosPorDeportistaId = async (req: Request, res: Respons
 };
 
 // Function to handle cronometro event
-export const eventCronometro = async (req: Request, res: Response) => {
+export const eventAction= async (req: Request, res: Response) => {
   try {
     const {
       params: { event, partidaId, platform }, body
@@ -62,7 +62,7 @@ export const eventCronometro = async (req: Request, res: Response) => {
 
     const request: RequestEventData = { event, partidaId, platform, body }
 
-    evento_service.actionCronometro(request);
+    eventoService.actionEvento(request);
     res.status(200).json({ message: "Event iniciado" });
   } catch (error) {
     res.status(500).json({ message: "Error al enviar el evento" });
@@ -70,10 +70,10 @@ export const eventCronometro = async (req: Request, res: Response) => {
 };
 
 // Function to get cronometro events
-export const getCronometroEvents = (req: Request, res: Response) => {
+export const getventsAction = (req: Request, res: Response) => {
   const {
     params: { partidaId, platform },
   } = req;
 
-  evento_service.addClient(partidaId, res, platform);
+  eventoService.addClient(partidaId, res, platform);
 };

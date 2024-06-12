@@ -3,7 +3,7 @@ import { IClients } from "../models/IClients";
 import { RequestEventData } from "../models/RequestEventData";
 
 
-export class evento_service {
+export class eventoService {
   private static clients: IClients = {};
 
   public static addClient(partidaId: string, client: Response, platform: string) {
@@ -37,7 +37,7 @@ export class evento_service {
     });
   }
 
-  public static actionCronometro(
+  public static actionEvento(
     { event, partidaId, platform, body }: RequestEventData
   ): void {
 

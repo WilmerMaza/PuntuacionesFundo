@@ -3,12 +3,11 @@ import * as registroController from '../controllers/puntaciones_controller';
 
 const router = Router();
 
-router.post('/crearRegistro', registroController.crearRegistro);
+router.post('/createRegister', registroController.crearRegistro);
 router.put('/actualizarIntentos/:id', registroController.actualizarIntentos);
 router.get('/porDeportista/:deportistaId', registroController.obtenerRegistrosPorDeportistaId);
-router.post("/cronometro/:platform/:event/:partidaId", registroController.eventCronometro );
-router.get("/cronometro/:platform/:partidaId", registroController.getCronometroEvents);
-
+router.post("/evento/:platform/:event/:partidaId", registroController.eventAction);
+router.get("/evento/:platform/:partidaId", registroController.getventsAction);
 
 
 
