@@ -3,13 +3,10 @@ import * as registroController from '../controllers/puntaciones_controller';
 
 const router = Router();
 
-router.post('/createRegister', registroController.crearRegistro);
-router.put('/actualizarIntentos/:id', registroController.actualizarIntentos);
-router.get('/porDeportista/:deportistaId', registroController.obtenerRegistrosPorDeportistaId);
-router.post("/evento/:platform/:event/:partidaId", registroController.eventAction);
-router.get("/evento/:platform/:partidaId", registroController.geteventsAction);
-
-
+router.post('/puntaciones/create', registroController.crearRegistro);
+router.put('/puntaciones/intentos/:id', registroController.actualizarIntentos);
+router.get('/puntaciones/deportista/:deportistaId', registroController.obtenerRegistrosPorDeportistaId);
+router.post("/puntaciones/evento/:platform/:event/:partidaId", registroController.eventAction);
+router.get("/puntaciones/eventos/:platform/:partidaId", registroController.geteventsAction);
 
 export default router;
-
