@@ -26,6 +26,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const registroController = __importStar(require("../controllers/puntaciones_controller"));
 const router = (0, express_1.Router)();
-router.post('/crearRegistro', registroController.crearRegistro);
+router.post('/createRegister', registroController.crearRegistro);
+router.put('/actualizarIntentos/:id', registroController.actualizarIntentos);
+router.get('/porDeportista/:deportistaId', registroController.obtenerRegistrosPorDeportistaId);
+router.post("/evento/:platform/:event/:partidaId", registroController.eventAction);
+router.get("/evento/:platform/:partidaId", registroController.getventsAction);
 exports.default = router;
 //# sourceMappingURL=router.js.map
