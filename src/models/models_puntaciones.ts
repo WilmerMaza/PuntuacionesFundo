@@ -7,10 +7,11 @@ export interface Intento {
 }
 
 export interface RegistroDocument extends Document {
-  deportista_id: mongoose.Types.ObjectId;
+  deportista_id: string;
   fecha: Date;
   tipo: 'Arranque' | 'Envión';
   intentos: Intento[];
+  partidaId: string 
 }
 
 const IntentoSchema = new Schema<Intento>({
@@ -20,10 +21,11 @@ const IntentoSchema = new Schema<Intento>({
 });
 
 const RegistroSchema = new Schema<RegistroDocument>({
-  deportista_id: { type: Schema.Types.ObjectId, required: true },
+  deportista_id: { type:String, required: true },
   fecha: { type: Date, required: true },
   tipo: { type: String, enum: ['Arranque', 'Envión'], required: true },
   intentos: { type: [IntentoSchema], required: true },
+  partidaId: { type: String, required: true }, // Añadido partidaId
 });
 
 export const Registro = mongoose.model<RegistroDocument>('Registro', RegistroSchema);
