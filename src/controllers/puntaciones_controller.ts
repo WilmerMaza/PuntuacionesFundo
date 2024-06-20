@@ -8,14 +8,11 @@ import { crearRegistro } from '../service/Service_puntaciones';
 
 export const crearRegistroController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { partidaId, ...registroData } = req.body; // Asegúrate de extraer partidaId
     const resultado = await crearRegistro(req.body);
-
-    console.log(resultado);
     res.status(201).send(resultado);
   } catch (error) {
     console.error('Error al crear el registro:', error);
-    res.status(400).send({ error});
+    res.status(400).send({ error });
   }
 };
 

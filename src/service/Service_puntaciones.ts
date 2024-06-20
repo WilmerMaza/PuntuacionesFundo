@@ -1,5 +1,3 @@
-
-import { platform } from 'os';
 import { Registro, RegistroDocument, Intento } from '../models/models_puntaciones';
 import { eventoService } from './evento_service';
 import { RequestEventData } from '../models/RequestEventData';
@@ -8,19 +6,17 @@ import { RequestEventData } from '../models/RequestEventData';
 export const crearRegistro = async (data: RegistroDocument): Promise<RegistroDocument> => {
   const nuevoRegistro = new Registro(data);
 
-
-
   const resultado = await nuevoRegistro.save();
 
-  const resquesmensjhe: RequestEventData = {
+  const requestEvento: RequestEventData = {
     event: 'create',
     partidaId: data.partidaId,
     platform: 'movil',
     body: resultado
   }
-  
 
- eventoService.actionEvento(resquesmensjhe);
+
+  eventoService.actionEvento(requestEvento);
 
   return resultado;
 };
