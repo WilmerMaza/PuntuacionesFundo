@@ -4,18 +4,17 @@ import mongoose from 'mongoose';
 import { Intento } from '../models/models_puntaciones';
 import { RequestEventData } from "../models/RequestEventData";
 import { eventoService } from "../service/evento_service";
+import { crearRegistro } from '../service/Service_puntaciones';
 
-
-export const crearRegistro = async (req: Request, res: Response): Promise<void> => {
+export const crearRegistroController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const resultado = await registroService.crearRegistro(req.body);
-    console.log(  resultado)
+    const resultado = await crearRegistro(req.body);
     res.status(201).send(resultado);
   } catch (error) {
-    res.status(400).send(error);
+    console.error('Error al crear el registro:', error);
+    res.status(400).send({ error });
   }
 };
-
 
 export const actualizarIntentos = async (req: Request, res: Response): Promise<void> => {
   try {

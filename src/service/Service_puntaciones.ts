@@ -1,16 +1,31 @@
-
 import { Registro, RegistroDocument, Intento } from '../models/models_puntaciones';
+import { eventoService } from './evento_service';
+import { RequestEventData } from '../models/RequestEventData';
 
-export const crearRegistro = async (data: Partial<RegistroDocument>): Promise<RegistroDocument> => {
+
+export const crearRegistro = async (data: RegistroDocument): Promise<RegistroDocument> => {
   const nuevoRegistro = new Registro(data);
-  return await nuevoRegistro.save();
+
+  const resultado = await nuevoRegistro.save();
+
+  const requestEvento: RequestEventData = {
+    event: 'create',
+    partidaId: data.partidaId,
+    platform: 'movil',
+    body: resultado
+  }
+
+
+  eventoService.actionEvento(requestEvento);
+
+  return resultado;
 };
 export const agregarIntento = async (registroId: string, intentoData: Intento): Promise<RegistroDocument | null> => {
   try {
     const registroToUpdate = await Registro.findByIdAndUpdate(
       registroId,
       { $push: { intentos: intentoData } },
-      { new: true } 
+      { new: true }
     );
 
     return registroToUpdate;
