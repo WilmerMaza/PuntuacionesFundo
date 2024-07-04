@@ -5,12 +5,10 @@ import { RequestEventData } from '../models/RequestEventData';
 
 export const crearRegistro = async (data: RegistroDocument): Promise<RegistroDocument> => {
   const nuevoRegistro = new Registro(data);
-
   const resultado = await nuevoRegistro.save();
-
   const requestEvento: RequestEventData = {
     event: 'create',
-    partidaId: data.partidaId,
+    partidaId: data.Id_Partida,
     platform: 'movil',
     body: resultado
   }
@@ -34,12 +32,14 @@ export const agregarIntento = async (registroId: string, intentoData: Intento): 
     return null;
   }
 };
-export const obtenerRegistrosPorDeportistaId = async (deportistaId: string): Promise<RegistroDocument[]> => {
+
+export const obtenerRegistrosPorPartidaId = async (partidaId: string): Promise<RegistroDocument[]> => {
   try {
-    const registros = await Registro.find({ deportista_id: deportistaId });
+    // Suponiendo que `Registro` es tu modelo de Mongoose para los registros
+    const registros = await Registro.find({ Id_Partida: partidaId }).exec();
     return registros;
   } catch (error) {
-    console.error('Error al obtener los registros del deportista:', error);
-    return [];
+    console.error('Error al obtener los registros por partidaId:', error);
+    throw new Error('Error al obtener los registros');
   }
 };
