@@ -38,8 +38,11 @@ const drawTable = (
   let numeroConsecutivo = 1;
 
   registros.forEach((registro, index) => {
-    const intentos = registro.intentos.map(i => `${i.peso} (${i.resultado})`);
-    const [intento1 = '', intento2 = '', intento3 = ''] = intentos;
+    const intentos = registro.intentos.map(i => ({
+      peso: i.peso ? i.peso.toString() : '',
+      resultado: i.resultado || '',
+    }));
+    const [intento1 = { peso: '', resultado: '' }, intento2 = { peso: '', resultado: '' }, intento3 = { peso: '', resultado: '' }] = intentos;
     const mejor = Math.max(...registro.intentos.filter(i => i.resultado === 'Éxito').map(i => Number(i.peso)), 0);
 
     const atleta = additionalData.find(data => data.Id === registro.deportista_id);
@@ -52,11 +55,27 @@ const drawTable = (
         .text(numeroConsecutivo.toString(), 50, y + 5, { align: 'center', width: columnWidth })
         .text(atleta.Name, 50 + columnWidth, y + 5, { align: 'center', width: columnWidth })
         .text(atleta.LastName, 50 + 2 * columnWidth, y + 5, { align: 'center', width: columnWidth })
-        .text(atleta.Numero_Sorteo, 50 + 3 * columnWidth, y + 5, { align: 'center', width: columnWidth })
-        .text(intento1, 50 + 4 * columnWidth, y + 5, { align: 'center', width: columnWidth })
-        .text(intento2, 50 + 5 * columnWidth, y + 5, { align: 'center', width: columnWidth })
-        .text(intento3, 50 + 6 * columnWidth, y + 5, { align: 'center', width: columnWidth })
-        .text(mejor.toString(), 50 + 7 * columnWidth, y + 5, { align: 'center', width: columnWidth });
+        .text(atleta.Numero_Sorteo, 50 + 3 * columnWidth, y + 5, { align: 'center', width: columnWidth });
+
+      // Add attempts and cross out the failed ones
+      const drawAttempt = (attempt: { peso: string, resultado: string }, colIndex: number) => {
+        const x = 50 + colIndex * columnWidth;
+        const yPos = y + 5;
+        const textWidth = doc.widthOfString(attempt.peso);
+        const textX = x + (columnWidth - textWidth) / 2;
+        const textY = yPos + doc.currentLineHeight() / 2; // Adjusted position
+
+        doc.text(attempt.peso, x, yPos, { align: 'center', width: columnWidth });
+        if (attempt.resultado === 'Fallo') {
+          doc.moveTo(textX, textY).lineTo(textX + textWidth, textY).stroke();
+        }
+      };
+
+      drawAttempt(intento1, 4);
+      drawAttempt(intento2, 5);
+      drawAttempt(intento3, 6);
+
+      doc.text(mejor.toString(), 50 + 7 * columnWidth, y + 5, { align: 'center', width: columnWidth });
 
       y += rowHeight;
       numeroConsecutivo++;
