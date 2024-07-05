@@ -4,7 +4,9 @@ import mongoose from 'mongoose';
 import { Intento } from '../models/models_puntaciones';
 import { RequestEventData } from "../models/RequestEventData";
 import { eventoService } from "../service/evento_service";
-import { crearRegistro } from '../service/Service_puntaciones';
+import { crearRegistro, } from '../service/Service_puntaciones';
+
+
 
 export const crearRegistroController = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -40,18 +42,8 @@ export const actualizarIntentos = async (req: Request, res: Response): Promise<v
 };
 
 
-export const obtenerRegistrosPorDeportistaId = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { deportistaId } = req.params;
 
-    const registros = await registroService.obtenerRegistrosPorDeportistaId(deportistaId);
 
-    res.status(200).json(registros);
-  } catch (error) {
-    console.error('Error al obtener los registros del deportista:', error);
-    res.status(500).send('Error interno del servidor');
-  }
-};
 
 
 export const eventAction = async (req: Request, res: Response): Promise<void> => {
@@ -77,3 +69,4 @@ export const geteventsAction = (req: Request, res: Response): void => {
 
   eventoService.addClient(partidaId, res, platform);
 };
+
