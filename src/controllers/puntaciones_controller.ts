@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import * as registroService from '../service/Service_puntaciones';
 import mongoose from 'mongoose';
-import { Intento } from '../models/models_puntaciones';
+import { Intento, RegistroDocument } from '../models/models_puntaciones';
 import { RequestEventData } from "../models/RequestEventData";
 import { eventoService } from "../service/evento_service";
 import { crearRegistro, } from '../service/Service_puntaciones';
@@ -10,11 +10,12 @@ import { crearRegistro, } from '../service/Service_puntaciones';
 
 export const crearRegistroController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const resultado = await crearRegistro(req.body);
-    res.status(201).send(resultado);
+    const nuevoRegistro = req.body as RegistroDocument;
+    const resultado = await crearRegistro(nuevoRegistro);
+    res.status(201).json(resultado);
   } catch (error) {
-    console.error('Error al crear el registro:', error);
-    res.status(400).send({ error });
+    console.error('Error al crear o actualizar el registro:', error);
+    res.status(400).json({ error: error });
   }
 };
 

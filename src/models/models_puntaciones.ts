@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface Intento {
   numero: number;
-  peso: mongoose.Types.Decimal128;
+  peso:number ;
   resultado: 'Éxito' | 'Fallo';
 }
 
@@ -16,7 +16,7 @@ export interface RegistroDocument extends Document {
 
 const IntentoSchema = new Schema<Intento>({
   numero: { type: Number, required: true },
-  peso: { type: Schema.Types.Decimal128, required: true },
+  peso: { type: Number, required: true },
   resultado: { type: String, enum: ['Éxito', 'Fallo'], required: true },
 });
 
