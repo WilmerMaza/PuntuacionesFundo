@@ -10,12 +10,12 @@ import { crearRegistro, } from '../service/Service_puntaciones';
 
 export const crearRegistroController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const nuevoRegistro = req.body as RegistroDocument;
+    const nuevoRegistro = req.body as RegistroDocument; // Asegúrate de tener definido correctamente el tipo RegistroDocument
     const resultado = await crearRegistro(nuevoRegistro);
     res.status(201).json(resultado);
   } catch (error) {
     console.error('Error al crear o actualizar el registro:', error);
-    res.status(400).json({ error: error });
+    res.status(400).json({ error: error }); // Enviar el mensaje de error como respuesta
   }
 };
 

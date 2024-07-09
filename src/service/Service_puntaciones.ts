@@ -1,87 +1,74 @@
 import { Registro, RegistroDocument, Intento } from '../models/models_puntaciones';
-import { eventoService } from './evento_service';
-import { RequestEventData } from '../models/RequestEventData';
 
-export const crearRegistro = async (data: RegistroDocument): Promise<RegistroDocument> => {
-  const { deportista_id, Id_Partida, tipo, intentos } = data;
 
-  let registroExistente = await Registro.findOne({ deportista_id, Id_Partida });
+export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
+  const { deportista_id, Id_Partida, tipo, intento } = data;
 
-  if (registroExistente) {
-    if (registroExistente.intentos.length !== 2) {
-      throw new Error('Debe haber dos intentos antes de agregar el tercero');
+  let registrosCreados: RegistroDocument[] = [];
+
+  const dataFin = await Registro.findOne({ deportista_id, Id_Partida }).sort({ fecha: -1 });
+
+  if (dataFin) {
+    let registroEvaluar: any = dataFin.intentos.find(({ resultado }: Intento) => resultado === 'Evaluar');
+
+    const registroUpdate: any = {
+      ...registroEvaluar,
+      peso: registroEvaluar.peso,
+      numero: registroEvaluar.numero,
+      id: registroEvaluar.id,
+      resultado: intento.resultado
     }
 
-    const ultimoIntento = registroExistente.intentos[1];
+    let responseUpdate = await Registro.updateOne(
+      { _id: dataFin.id, 'intentos._id': registroUpdate.id },
+      { $set: { 'intentos.$.resultado': intento.resultado } });
 
-    if (!ultimoIntento || !ultimoIntento.resultado) {
-      throw new Error('Los intentos previos no están definidos correctamente');
+
+    if (!responseUpdate.acknowledged) {
+      console.log('====================================');
+      console.log('Error: La actualización del intento no fue reconocida');
+      console.log('====================================');
     }
 
-    const pesoTercerIntento = ultimoIntento.resultado === 'Fallo' ? ultimoIntento.peso : intentos[1].peso;
+    if (dataFin.intentos.length < 3) {
+      const ultimoIntento: Intento = {
+        numero: 3,
+        peso: intento.resultado === 'Éxito' ? registroEvaluar.peso + 1 : registroEvaluar.peso,
+        resultado: 'Evaluar'
+      };
 
-    const nuevoIntento: Intento = {
-      numero: 3,
-      peso: pesoTercerIntento,
-      resultado: intentos[0].resultado 
-    };
+      responseUpdate = await Registro.updateOne(
+        { deportista_id, Id_Partida },
+        { $push: { intentos: ultimoIntento } }
+      );
+    }
 
-    registroExistente.intentos.push(nuevoIntento);
-    registroExistente.fecha = new Date();
-
-    const resultado = await registroExistente.save();
-
-    return resultado;
   } else {
-    if (intentos.length !== 2) {
-      throw new Error('Se deben proporcionar dos intentos en la primera creación');
+    const intentos = []
+    for (let index = 0; index < 2; index++) {
+      intentos.push({
+        numero: index + 1,
+        peso: intento.resultado === 'Éxito' && index > 0 ? intento.peso + 1 : intento.peso,
+        resultado: index === 1 ? 'Evaluar' : intento.resultado
+      })
+
     }
-
-    const primerIntento: Intento = {
-      numero: 1,
-      peso: intentos[0].peso,
-      resultado: intentos[0].resultado
-    };
-
-    if (!intentos[1] || !intentos[1].resultado) {
-      throw new Error('El segundo intento no está definido correctamente');
-    }
-
-   
-    if (primerIntento.resultado === 'Éxito' && intentos[1].peso <= primerIntento.peso) {
-      throw new Error('El segundo intento debe ser al menos 1 kg mayor que el primer intento exitoso');
-    }
-
-   
-    const pesoSegundoIntento = primerIntento.resultado === 'Fallo' ? primerIntento.peso : intentos[1].peso;
-
-    const segundoIntento: Intento = {
-      numero: 2,
-      peso: pesoSegundoIntento,
-      resultado: intentos[1].resultado
-    };
 
     const nuevoRegistro = new Registro({
       deportista_id,
       fecha: new Date(),
       tipo,
-      intentos: [primerIntento, segundoIntento],
+      intentos,
       Id_Partida
     });
 
-    const resultado = await nuevoRegistro.save();
-
-    const requestEvento: RequestEventData = {
-      event: 'create',
-      partidaId: Id_Partida,
-      platform: 'movil',
-      body: resultado
-    };
-
-    eventoService.actionEvento(requestEvento);
-
-    return resultado;
+    await nuevoRegistro.save();
   }
+
+
+
+
+  return registrosCreados[registrosCreados.length - 1];
 };
 
 export const agregarIntento = async (registroId: string, intentoData: Intento): Promise<RegistroDocument | null> => {

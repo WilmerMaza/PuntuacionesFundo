@@ -2,8 +2,8 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface Intento {
   numero: number;
-  peso:number ;
-  resultado: 'Éxito' | 'Fallo';
+  peso: number;
+  resultado: 'Éxito' | 'Fallo' | 'Evaluar'; // Añadido 'Por Evaluar'
 }
 
 export interface RegistroDocument extends Document {
@@ -11,21 +11,21 @@ export interface RegistroDocument extends Document {
   fecha: Date;
   tipo: 'Arranque' | 'Envión';
   intentos: Intento[];
-  Id_Partida: string 
+  Id_Partida: string;
 }
 
 const IntentoSchema = new Schema<Intento>({
   numero: { type: Number, required: true },
   peso: { type: Number, required: true },
-  resultado: { type: String, enum: ['Éxito', 'Fallo'], required: true },
+  resultado: { type: String, enum: ['Éxito', 'Fallo', 'Evaluar'], required: true }, // Añadido 'Por Evaluar'
 });
 
 const RegistroSchema = new Schema<RegistroDocument>({
-  deportista_id: { type:String, required: true },
+  deportista_id: { type: String, required: true },
   fecha: { type: Date, required: true },
   tipo: { type: String, enum: ['Arranque', 'Envión'], required: true },
   intentos: { type: [IntentoSchema], required: true },
-  Id_Partida: { type: String, required: true }, // Añadido partidaId
+  Id_Partida: { type: String, required: true },
 });
 
 export const Registro = mongoose.model<RegistroDocument>('Registro', RegistroSchema);
