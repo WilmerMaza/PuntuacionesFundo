@@ -7,7 +7,6 @@ export class eventoService {
   private static clients: IClients = {};
 
   public static addClient(partidaId: string, client: Response, platform: string) {
-    // Asegurarse de que los headers son adecuados para SSE
     client.setHeader("Content-Type", "text/event-stream");
     client.setHeader("Cache-Control", "no-cache");
     client.setHeader("Connection", "keep-alive");
@@ -20,8 +19,7 @@ export class eventoService {
     }
     this.clients[partidaId][platform].push(client);
 
-    // Manejar correctamente el cierre de la conexión
-    // Manejar correctamente el cierre de la conexión
+    
     client.on("close", () => {
       this.clients[partidaId][platform] = this.clients[partidaId][platform].filter(
         (c) => c !== client
@@ -29,7 +27,7 @@ export class eventoService {
       if (this.clients[partidaId][platform].length === 0) {
         delete this.clients[partidaId][platform];
       }
-      // Si todas las plataformas están vacías, eliminar la partidaId
+      
       if (Object.keys(this.clients[partidaId]).length === 0) {
         delete this.clients[partidaId];
       }
