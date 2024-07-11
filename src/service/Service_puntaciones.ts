@@ -86,6 +86,27 @@ export const agregarIntento = async (registroId: string, intentoData: Intento): 
   }
 };
 
+export const actualizarPeso = async (deportista_id: string, numero: number, nuevo_peso: number): Promise<RegistroDocument | null> => {
+  // Buscar el registro del deportista
+  const registro = await Registro.findOne({ deportista_id });
+
+  if (!registro) {
+    throw new Error('Registro no encontrado');
+  }
+
+  const intento = registro.intentos.find(i => i.numero === numero);
+  if (!intento) {
+    throw new Error('Intento no encontrado');
+  }
+
+
+  intento.peso = nuevo_peso;
+
+  await registro.save();
+  
+  return registro;
+};
+
 export const obtenerRegistrosPorPartidaId = async (partidaId: string): Promise<RegistroDocument[]> => {
   try {
 

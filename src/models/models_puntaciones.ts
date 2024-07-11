@@ -15,9 +15,9 @@ export interface RegistroDocument extends Document {
 }
 
 const IntentoSchema = new Schema<Intento>({
-  numero: { type: Number, required: true },
-  peso: { type: Number, required: true },
-  resultado: { type: String, enum: ['Éxito', 'Fallo', 'Evaluar'], required: true }, 
+  numero: { type: Number },
+  peso: { type: Number},
+  resultado: { type: String, enum: ['Éxito', 'Fallo', 'Evaluar']}, 
 });
 
 const RegistroSchema = new Schema<RegistroDocument>({

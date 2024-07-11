@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
-import * as registroService from '../service/Service_puntaciones';
-import mongoose from 'mongoose';
-import { Intento, RegistroDocument } from '../models/models_puntaciones';
+import {  RegistroDocument } from '../models/models_puntaciones';
 import { RequestEventData } from "../models/RequestEventData";
 import { eventoService } from "../service/evento_service";
-import { crearRegistro, } from '../service/Service_puntaciones';
+import { crearRegistro,actualizarPeso } from '../service/Service_puntaciones';
 
 
 
@@ -19,31 +17,23 @@ export const crearRegistroController = async (req: Request, res: Response): Prom
   }
 };
 
-export const actualizarIntentos = async (req: Request, res: Response): Promise<void> => {
+export const actualizarPesoController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { deportista_id, numero, nuevo_peso } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      res.status(400).send('ID de registro inválido');
+   
+    if (!deportista_id || typeof numero !== 'number' || typeof nuevo_peso !== 'number') {
+      res.status(400).send({ error: 'Faltan parámetros requeridos o son inválidos' });
       return;
     }
 
-    const intento: Intento = req.body;
+    const registroActualizado = await actualizarPeso(deportista_id, numero, nuevo_peso);
 
-    const result = await registroService.agregarIntento(id, intento);
-    if (!result) {
-      res.status(404).send('Registro no encontrado');
-      return;
-    }
-    res.status(200).json(result);
+    res.status(200).send(registroActualizado);
   } catch (error) {
-    console.error('Error al actualizar los intentos:', error);
-    res.status(500).send('Error interno del servidor');
+    res.status(500).send({ error: error });
   }
 };
-
-
-
 
 
 
@@ -70,4 +60,6 @@ export const geteventsAction = (req: Request, res: Response): void => {
 
   eventoService.addClient(partidaId, res, platform);
 };
+
+
 
