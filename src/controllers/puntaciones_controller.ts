@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
-import {  RegistroDocument } from '../models/models_puntaciones';
+import { RegistroDocument } from '../models/models_puntaciones';
 import { RequestEventData } from "../models/RequestEventData";
 import { eventoService } from "../service/evento_service";
-import { crearRegistro,actualizarPeso } from '../service/Service_puntaciones';
-
-
+import { crearRegistro, actualizarPesoIntento } from '../service/Service_puntaciones';
 
 export const crearRegistroController = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -13,25 +11,30 @@ export const crearRegistroController = async (req: Request, res: Response): Prom
     res.status(201).json(resultado);
   } catch (error) {
     console.error('Error al crear o actualizar el registro:', error);
-    res.status(400).json({ error: error }); 
+    res.status(400).json({ error: error });
   }
 };
 
-export const actualizarPesoController = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { deportista_id, numero, nuevo_peso } = req.body;
 
-   
-    if (!deportista_id || typeof numero !== 'number' || typeof nuevo_peso !== 'number') {
-      res.status(400).send({ error: 'Faltan parámetros requeridos o son inválidos' });
+export const actualizarIntentos = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { deportista_id } = req.params;
+    const { peso, partidaId } = req.body;
+
+
+
+
+    const result = await actualizarPesoIntento(deportista_id, partidaId, peso);
+
+    if (!result) {
+      res.status(404).send('Registro o intento no encontrado');
       return;
     }
 
-    const registroActualizado = await actualizarPeso(deportista_id, numero, nuevo_peso);
-
-    res.status(200).send(registroActualizado);
+    res.status(200).json(result);
   } catch (error) {
-    res.status(500).send({ error: error });
+    console.error('Error al actualizar el intento:', error);
+    res.status(500).send('Error interno del servidor');
   }
 };
 

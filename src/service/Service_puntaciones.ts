@@ -1,4 +1,7 @@
 import { Registro, RegistroDocument, Intento } from '../models/models_puntaciones';
+import { RequestEventData } from '../models/RequestEventData';
+import { eventoService } from './evento_service';
+
 
 
 export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
@@ -17,17 +20,26 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
       numero: registroEvaluar.numero,
       id: registroEvaluar.id,
       resultado: intento.resultado
-    }
+    };
 
     let responseUpdate = await Registro.updateOne(
       { _id: dataFin.id, 'intentos._id': registroUpdate.id },
-      { $set: { 'intentos.$.resultado': intento.resultado } });
-
+      { $set: { 'intentos.$.resultado': intento.resultado } }
+    );
 
     if (!responseUpdate.acknowledged) {
       console.log('====================================');
       console.log('Error: La actualización del intento no fue reconocida');
       console.log('====================================');
+    } else {
+      const requestEvento: RequestEventData = {
+        event: 'update',
+        partidaId: Id_Partida,
+        platform: 'movil',
+        body: dataFin
+      };
+
+      eventoService.actionEvento(requestEvento);
     }
 
     if (dataFin.intentos.length < 3) {
@@ -44,14 +56,13 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
     }
 
   } else {
-    const intentos = []
+    const intentos = [];
     for (let index = 0; index < 2; index++) {
       intentos.push({
         numero: index + 1,
         peso: intento.resultado === 'Éxito' && index > 0 ? intento.peso + 1 : intento.peso,
         resultado: index === 1 ? 'Evaluar' : intento.resultado
-      })
-
+      });
     }
 
     const nuevoRegistro = new Registro({
@@ -62,11 +73,18 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
       Id_Partida
     });
 
-    await nuevoRegistro.save();
+    const resultadoSave = await nuevoRegistro.save();
+    registrosCreados.push(resultadoSave);
+
+    const requestEvento: RequestEventData = {
+      event: 'create',
+      partidaId: Id_Partida,
+      platform: 'movil',
+      body: resultadoSave
+    };
+
+    eventoService.actionEvento(requestEvento);
   }
-
-
-
 
   return registrosCreados[registrosCreados.length - 1];
 };
@@ -86,25 +104,33 @@ export const agregarIntento = async (registroId: string, intentoData: Intento): 
   }
 };
 
-export const actualizarPeso = async (deportista_id: string, numero: number, nuevo_peso: number): Promise<RegistroDocument | null> => {
-  // Buscar el registro del deportista
-  const registro = await Registro.findOne({ deportista_id });
+export const actualizarPesoIntento = async (deportista_id: string, Id_Partida: string, nuevoPeso: number): Promise<RegistroDocument | null> => {
+  try {
+    // Encuentra el registro del deportista en la partida específica
+    const dataFin = await Registro.findOne({ deportista_id, Id_Partida }).sort({ fecha: -1 });
 
-  if (!registro) {
-    throw new Error('Registro no encontrado');
+    if (!dataFin) {
+      return null; // No se encontró el registro
+    }
+
+    // Encuentra el intento con el estado "Evaluar"
+    const registroEvaluar = dataFin.intentos.find(({ resultado }: Intento) => resultado === 'Evaluar');
+
+    if (!registroEvaluar) {
+      return null; // No se encontró ningún intento con el estado "Evaluar"
+    }
+
+    // Actualiza el peso del intento encontrado
+    registroEvaluar.peso = nuevoPeso;
+
+    // Guarda el registro actualizado
+    await dataFin.save();
+
+    return dataFin;
+  } catch (error) {
+    console.error('Error al actualizar el peso del intento:', error);
+    return null;
   }
-
-  const intento = registro.intentos.find(i => i.numero === numero);
-  if (!intento) {
-    throw new Error('Intento no encontrado');
-  }
-
-
-  intento.peso = nuevo_peso;
-
-  await registro.save();
-  
-  return registro;
 };
 
 export const obtenerRegistrosPorPartidaId = async (partidaId: string): Promise<RegistroDocument[]> => {
