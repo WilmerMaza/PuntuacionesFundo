@@ -106,21 +106,20 @@ export const agregarIntento = async (registroId: string, intentoData: Intento): 
 
 export const actualizarPesoIntento = async (deportista_id: string, Id_Partida: string, nuevoPeso: number): Promise<RegistroDocument | null> => {
   try {
-    // Encuentra el registro del deportista en la partida específica
+   
     const dataFin = await Registro.findOne({ deportista_id, Id_Partida }).sort({ fecha: -1 });
 
     if (!dataFin) {
-      return null; // No se encontró el registro
+      return null; 
     }
 
-    // Encuentra el intento con el estado "Evaluar"
+  
     const registroEvaluar = dataFin.intentos.find(({ resultado }: Intento) => resultado === 'Evaluar');
 
     if (!registroEvaluar) {
-      return null; // No se encontró ningún intento con el estado "Evaluar"
+      return null;
     }
 
-    // Actualiza el peso del intento encontrado
     registroEvaluar.peso = nuevoPeso;
 
     // Guarda el registro actualizado
