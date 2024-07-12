@@ -6,32 +6,24 @@ import { eventoService } from './evento_service';
 export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
   const { deportista_id, Id_Partida, tipo, intento } = data;
 
-
-
   const dataFin = await Registro.findOne({ deportista_id, Id_Partida }).sort({ fecha: -1 });
-
   if (dataFin) {
     let registroEvaluar: any = dataFin.intentos.find(({ resultado }: Intento) => resultado === 'Evaluar');
-
-  
     let responseUpdate = await Registro.updateOne(
       { _id: dataFin.id, 'intentos._id': registroEvaluar.id },
       { $set: { 'intentos.$.resultado': intento.resultado } }
     );
-
     if (!responseUpdate.acknowledged) {
       console.log('====================================');
       console.log('Error: La actualización del intento no fue reconocida');
       console.log('====================================');
     }
-
     if (dataFin.intentos.length < 3) {
       const ultimoIntento: Intento = {
         numero: 3,
         peso: intento.resultado === 'Éxito' ? registroEvaluar.peso + 1 : registroEvaluar.peso,
         resultado: 'Evaluar'
       };
-
       responseUpdate = await Registro.updateOne(
         { deportista_id, Id_Partida },
         { $push: { intentos: ultimoIntento } }
@@ -46,6 +38,7 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
         resultado: index === 1 ? 'Evaluar' : intento.resultado
       });
     }
+
     const nuevoRegistro = new Registro({
       deportista_id,
       fecha: new Date(),
@@ -53,18 +46,17 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
       intentos,
       Id_Partida
     });
-
-    const resultadoSave = await nuevoRegistro.save();
-    data.push(resultadoSave);
+    await nuevoRegistro.save();
   }
-
   const requestEvento: RequestEventData = {
     event: 'create',
     partidaId: Id_Partida,
     platform: 'movil',
     body: data
   };
+
   eventoService.actionEvento(requestEvento);
+
   return data;
 };
 export const agregarIntento = async (registroId: string, intentoData: Intento): Promise<RegistroDocument | null> => {
@@ -88,18 +80,18 @@ export const actualizarPesoIntento = async (deportista_id: string, Id_Partida: s
     const dataFin = await Registro.findOne({ deportista_id, Id_Partida }).sort({ fecha: -1 });
 
     if (!dataFin) {
-      throw new Error('No se encontró el registro para actualizar el peso'); 
+      throw new Error('No se encontró el registro para actualizar el peso');
     }
     const registroEvaluar = dataFin.intentos.find(({ resultado }: Intento) => resultado === 'Evaluar');
     if (!registroEvaluar) {
-      throw new Error('No se encontró el intento a evaluar para actualizar el peso'); 
+      throw new Error('No se encontró el intento a evaluar para actualizar el peso');
     }
     registroEvaluar.peso = nuevoPeso;
-    await dataFin.save(); 
+    await dataFin.save();
     return dataFin;
   } catch (error) {
     console.error('Error al actualizar el peso del intento:', error);
-    return null; 
+    return null;
   }
 };
 
