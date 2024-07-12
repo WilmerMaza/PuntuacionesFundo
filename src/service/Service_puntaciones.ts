@@ -6,23 +6,16 @@ import { eventoService } from './evento_service';
 export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
   const { deportista_id, Id_Partida, tipo, intento } = data;
 
-  let registrosCreados: RegistroDocument[] = [];
+
 
   const dataFin = await Registro.findOne({ deportista_id, Id_Partida }).sort({ fecha: -1 });
 
   if (dataFin) {
     let registroEvaluar: any = dataFin.intentos.find(({ resultado }: Intento) => resultado === 'Evaluar');
 
-    const registroUpdate: any = {
-      ...registroEvaluar,
-      peso: registroEvaluar.peso,
-      numero: registroEvaluar.numero,
-      id: registroEvaluar.id,
-      resultado: intento.resultado
-    };
-
+  
     let responseUpdate = await Registro.updateOne(
-      { _id: dataFin.id, 'intentos._id': registroUpdate.id },
+      { _id: dataFin.id, 'intentos._id': registroEvaluar.id },
       { $set: { 'intentos.$.resultado': intento.resultado } }
     );
 
@@ -44,7 +37,6 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
         { $push: { intentos: ultimoIntento } }
       );
     }
-
   } else {
     const intentos = [];
     for (let index = 0; index < 2; index++) {
@@ -54,7 +46,6 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
         resultado: index === 1 ? 'Evaluar' : intento.resultado
       });
     }
-
     const nuevoRegistro = new Registro({
       deportista_id,
       fecha: new Date(),
@@ -64,19 +55,17 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
     });
 
     const resultadoSave = await nuevoRegistro.save();
-    registrosCreados.push(resultadoSave);
+    data.push(resultadoSave);
   }
 
   const requestEvento: RequestEventData = {
     event: 'create',
     partidaId: Id_Partida,
     platform: 'movil',
-    body: dataFin || registrosCreados[0]
+    body: data
   };
-
   eventoService.actionEvento(requestEvento);
-
-  return registrosCreados[registrosCreados.length - 1];
+  return data;
 };
 export const agregarIntento = async (registroId: string, intentoData: Intento): Promise<RegistroDocument | null> => {
   try {
