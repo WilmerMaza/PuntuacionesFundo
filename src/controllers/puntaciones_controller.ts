@@ -1,12 +1,8 @@
 import { Request, Response } from 'express';
-import * as registroService from '../service/Service_puntaciones';
-import mongoose from 'mongoose';
-import { Intento, RegistroDocument } from '../models/models_puntaciones';
+import { RegistroDocument } from '../models/models_puntaciones';
 import { RequestEventData } from "../models/RequestEventData";
 import { eventoService } from "../service/evento_service";
-import { crearRegistro, } from '../service/Service_puntaciones';
-
-
+import { crearRegistro, actualizarPesoIntento } from '../service/Service_puntaciones';
 
 export const crearRegistroController = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -15,36 +11,35 @@ export const crearRegistroController = async (req: Request, res: Response): Prom
     res.status(201).json(resultado);
   } catch (error) {
     console.error('Error al crear o actualizar el registro:', error);
-    res.status(400).json({ error: error }); 
+    res.status(400).json({ error: error });
   }
 };
 
 export const actualizarIntentos = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      res.status(400).send('ID de registro inválido');
-      return;
-    }
-
-    const intento: Intento = req.body;
-
-    const result = await registroService.agregarIntento(id, intento);
+    const { deportista_id } = req.params;
+    const { peso, partidaId } = req.body;
+    
+    const result = await actualizarPesoIntento(deportista_id, partidaId, peso);
+    
     if (!result) {
-      res.status(404).send('Registro no encontrado');
-      return;
+      throw new Error('Registro o intento no encontrado');
     }
-    res.status(200).json(result);
+    
+    res.status(200).json({
+      message: 'Intento actualizado exitosamente',
+      athlete: result,
+    });
   } catch (error) {
-    console.error('Error al actualizar los intentos:', error);
-    res.status(500).send('Error interno del servidor');
+    console.error('Error al actualizar el intento:', error);
+    
+    if (error === 'Registro o intento no encontrado') {
+      res.status(404).json({ message: error });
+    } else {
+      res.status(500).json({ message: 'Error interno del servidor' });
+    }
   }
 };
-
-
-
-
 
 
 export const eventAction = async (req: Request, res: Response): Promise<void> => {
@@ -70,4 +65,6 @@ export const geteventsAction = (req: Request, res: Response): void => {
 
   eventoService.addClient(partidaId, res, platform);
 };
+
+
 
