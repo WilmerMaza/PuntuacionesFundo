@@ -3,7 +3,6 @@ import { RequestEventData } from '../models/RequestEventData';
 import { eventoService } from './evento_service';
 
 
-
 export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
   const { deportista_id, Id_Partida, tipo, intento } = data;
 
@@ -31,15 +30,6 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
       console.log('====================================');
       console.log('Error: La actualización del intento no fue reconocida');
       console.log('====================================');
-    } else {
-      const requestEvento: RequestEventData = {
-        event: 'update',
-        partidaId: Id_Partida,
-        platform: 'movil',
-        body: dataFin
-      };
-
-      eventoService.actionEvento(requestEvento);
     }
 
     if (dataFin.intentos.length < 3) {
@@ -75,20 +65,19 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
 
     const resultadoSave = await nuevoRegistro.save();
     registrosCreados.push(resultadoSave);
-
-    const requestEvento: RequestEventData = {
-      event: 'create',
-      partidaId: Id_Partida,
-      platform: 'movil',
-      body: resultadoSave
-    };
-
-    eventoService.actionEvento(requestEvento);
   }
+
+  const requestEvento: RequestEventData = {
+    event: 'create',
+    partidaId: Id_Partida,
+    platform: 'movil',
+    body: dataFin || registrosCreados[0]
+  };
+
+  eventoService.actionEvento(requestEvento);
 
   return registrosCreados[registrosCreados.length - 1];
 };
-
 export const agregarIntento = async (registroId: string, intentoData: Intento): Promise<RegistroDocument | null> => {
   try {
     const registroToUpdate = await Registro.findByIdAndUpdate(
@@ -104,31 +93,24 @@ export const agregarIntento = async (registroId: string, intentoData: Intento): 
   }
 };
 
+
 export const actualizarPesoIntento = async (deportista_id: string, Id_Partida: string, nuevoPeso: number): Promise<RegistroDocument | null> => {
   try {
-   
     const dataFin = await Registro.findOne({ deportista_id, Id_Partida }).sort({ fecha: -1 });
 
     if (!dataFin) {
-      return null; 
+      throw new Error('No se encontró el registro para actualizar el peso'); 
     }
-
-  
     const registroEvaluar = dataFin.intentos.find(({ resultado }: Intento) => resultado === 'Evaluar');
-
     if (!registroEvaluar) {
-      return null;
+      throw new Error('No se encontró el intento a evaluar para actualizar el peso'); 
     }
-
     registroEvaluar.peso = nuevoPeso;
-
-    // Guarda el registro actualizado
-    await dataFin.save();
-
+    await dataFin.save(); 
     return dataFin;
   } catch (error) {
     console.error('Error al actualizar el peso del intento:', error);
-    return null;
+    return null; 
   }
 };
 
