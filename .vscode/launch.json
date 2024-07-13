@@ -1,21 +1,23 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${file}",
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
-            ]
-        }
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "Launch Program",
+        "skipFiles": [
+          "<node_internals>/**"
+        ],
+        "program": "${workspaceFolder}/src/app.ts",
+        "preLaunchTask": "tsc: build - tsconfig.json", // Compila TypeScript antes de lanzar
+        "outFiles": [
+          "${workspaceFolder}/dist/**/*.js"
+        ],
+        "runtimeArgs": [
+          "--nolazy", // Desactiva el lazy loading para el debugging
+          "-r", "ts-node/register" // Añade ts-node en tiempo de ejecución para ejecutar TypeScript directamente
+        ]
+      }
     ]
-}
+  }
+  

@@ -1,4 +1,4 @@
-import { Registro, RegistroDocument, Intento } from '../models/models_puntaciones';
+import { Intento, Registro, RegistroDocument } from '../models/models_puntaciones';
 import { RequestEventData } from '../models/RequestEventData';
 import { eventoService } from './evento_service';
 
@@ -22,7 +22,8 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
       const ultimoIntento: Intento = {
         numero: 3,
         peso: intento.resultado === 'Éxito' ? registroEvaluar.peso + 1 : registroEvaluar.peso,
-        resultado: 'Evaluar'
+        resultado: 'Evaluar',
+        tiempo: new Date()
       };
       responseUpdate = await Registro.updateOne(
         { deportista_id, Id_Partida },
@@ -35,8 +36,10 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
       intentos.push({
         numero: index + 1,
         peso: intento.resultado === 'Éxito' && index > 0 ? intento.peso + 1 : intento.peso,
-        resultado: index === 1 ? 'Evaluar' : intento.resultado
-      });
+        resultado: index === 1 ? 'Evaluar' : intento.resultado,
+        tiempo: new Date()
+      })
+
     }
 
     const nuevoRegistro = new Registro({
@@ -59,6 +62,7 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
 
   return data;
 };
+
 export const agregarIntento = async (registroId: string, intentoData: Intento): Promise<RegistroDocument | null> => {
   try {
     const registroToUpdate = await Registro.findByIdAndUpdate(
@@ -97,7 +101,6 @@ export const actualizarPesoIntento = async (deportista_id: string, Id_Partida: s
 
 export const obtenerRegistrosPorPartidaId = async (partidaId: string): Promise<RegistroDocument[]> => {
   try {
-
     const registros = await Registro.find({ Id_Partida: partidaId }).exec();
     return registros;
   } catch (error) {

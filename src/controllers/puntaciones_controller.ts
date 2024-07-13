@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { RegistroDocument } from '../models/models_puntaciones';
 import { RequestEventData } from "../models/RequestEventData";
 import { eventoService } from "../service/evento_service";
-import { crearRegistro, actualizarPesoIntento } from '../service/Service_puntaciones';
+import { actualizarPesoIntento, crearRegistro, obtenerRegistrosPorPartidaId as obtenerPartida } from '../service/Service_puntaciones';
 
 export const crearRegistroController = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -38,6 +38,20 @@ export const actualizarIntentos = async (req: Request, res: Response): Promise<v
     } else {
       res.status(500).json({ message: 'Error interno del servidor' });
     }
+  }
+};
+
+
+export const obtenerRegistrosPorPartidaId= async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { partidaId } = req.params;
+
+    const registros = await obtenerPartida(partidaId);
+
+    res.status(200).json(registros);
+  } catch (error) {
+    console.error('Error al obtener los registros del deportista:', error);
+    res.status(500).send('Error interno del servidor');
   }
 };
 
