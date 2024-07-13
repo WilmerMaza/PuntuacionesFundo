@@ -16,8 +16,8 @@ export interface RegistroDocument extends Document {
 }
 
 const IntentoSchema = new Schema<Intento>({
-  numero: { type: Number, required: true },
-  peso: { type: Number, required: true },
+  numero: { type: Number,  },
+  peso: { type: Number },
   resultado: { type: String, enum: ['Éxito', 'Fallo', 'Evaluar']},
   tiempo: { type: Date, required: true },
 });
