@@ -3,7 +3,8 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface Intento {
   numero: number;
   peso: number;
-  resultado: 'Éxito' | 'Fallo' | 'Evaluar'; 
+  resultado: 'Éxito' | 'Fallo' | 'Evaluar';
+  tiempo: Date;
 }
 
 export interface RegistroDocument extends Document {
@@ -15,9 +16,10 @@ export interface RegistroDocument extends Document {
 }
 
 const IntentoSchema = new Schema<Intento>({
-  numero: { type: Number },
-  peso: { type: Number},
-  resultado: { type: String, enum: ['Éxito', 'Fallo', 'Evaluar']}, 
+  numero: { type: Number,  },
+  peso: { type: Number },
+  resultado: { type: String, enum: ['Éxito', 'Fallo', 'Evaluar']},
+  tiempo: { type: Date, required: true },
 });
 
 const RegistroSchema = new Schema<RegistroDocument>({
