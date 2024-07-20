@@ -79,23 +79,40 @@ export const agregarIntento = async (registroId: string, intentoData: Intento): 
 };
 
 
-export const actualizarPesoIntento = async (deportista_id: string, Id_Partida: string, nuevoPeso: number): Promise<RegistroDocument | null> => {
+export const actualizarPesoIntento = async (deportista_id: string, Id_Partida: string, nuevoPeso: number, tipo: string): Promise<RegistroDocument | null> => {
   try {
-    const dataFin = await Registro.findOne({ deportista_id, Id_Partida }).sort({ fecha: -1 });
+    let dataFin = await Registro.findOne({ deportista_id, Id_Partida }).sort({ fecha: -1 });
 
     if (!dataFin) {
-      throw new Error('No se encontró el registro para actualizar el peso');
+    
+      dataFin = new Registro({
+        deportista_id,
+        Id_Partida,
+        tipo: tipo, 
+        intentos: [
+          {
+            numero: 1,
+            peso: nuevoPeso,
+            resultado: 'Evaluar',
+            tiempo: new Date() 
+          }
+        ],
+        fecha: new Date()
+      });
+    } else {
+      const registroEvaluar = dataFin.intentos.find((intento: Intento) => intento.resultado === 'Evaluar');
+
+      if (registroEvaluar) {
+        registroEvaluar.peso = nuevoPeso;
+        registroEvaluar.tiempo = new Date(); 
+      }
     }
-    const registroEvaluar = dataFin.intentos.find(({ resultado }: Intento) => resultado === 'Evaluar');
-    if (!registroEvaluar) {
-      throw new Error('No se encontró el intento a evaluar para actualizar el peso');
-    }
-    registroEvaluar.peso = nuevoPeso;
-    await dataFin.save();
+
+    await dataFin.save(); 
     return dataFin;
   } catch (error) {
     console.error('Error al actualizar el peso del intento:', error);
-    return null;
+    return null; 
   }
 };
 

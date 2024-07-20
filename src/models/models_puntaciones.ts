@@ -5,6 +5,7 @@ export interface Intento {
   peso: number;
   resultado: 'Éxito' | 'Fallo' | 'Evaluar';
   tiempo: Date;
+
 }
 
 export interface RegistroDocument extends Document {

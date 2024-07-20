@@ -15,12 +15,13 @@ export const crearRegistroController = async (req: Request, res: Response): Prom
   }
 };
 
+
 export const actualizarIntentos = async (req: Request, res: Response): Promise<void> => {
   try {
     const { deportista_id } = req.params;
-    const { peso, partidaId } = req.body;
+    const { peso, partidaId, tipo } = req.body; 
     
-    const result = await actualizarPesoIntento(deportista_id, partidaId, peso);
+    const result = await actualizarPesoIntento(deportista_id, partidaId, peso, tipo);
     
     if (!result) {
       throw new Error('Registro o intento no encontrado');
@@ -40,8 +41,6 @@ export const actualizarIntentos = async (req: Request, res: Response): Promise<v
     }
   }
 };
-
-
 export const obtenerRegistrosPorPartidaId= async (req: Request, res: Response): Promise<void> => {
   try {
     const { partidaId } = req.params;
