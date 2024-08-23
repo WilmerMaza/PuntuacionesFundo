@@ -6,7 +6,7 @@ import { eventoService } from './evento_service';
 export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
   const { deportista_id, Id_Partida, tipo, intento } = data;
 
-  const dataFin = await Registro.findOne({ deportista_id, Id_Partida,tipo}).sort({ fecha: -1 });
+  const dataFin = await Registro.findOne({ deportista_id, Id_Partida, tipo }).sort({ fecha: -1 });
   if (dataFin) {
     let registroEvaluar: any = dataFin.intentos.find(({ resultado }: Intento) => resultado === 'Evaluar');
     let responseUpdate = await Registro.updateOne(
@@ -26,7 +26,7 @@ export const crearRegistro = async (data: any): Promise<RegistroDocument> => {
         tiempo: new Date()
       };
       responseUpdate = await Registro.updateOne(
-        { deportista_id, Id_Partida },
+        { deportista_id, Id_Partida, tipo },
         { $push: { intentos: ultimoIntento } }
       );
     }
@@ -81,7 +81,7 @@ export const agregarIntento = async (registroId: string, intentoData: Intento): 
 
 export const actualizarPesoIntento = async (deportista_id: string, Id_Partida: string, nuevoPeso: number, tipo: string): Promise<RegistroDocument | null> => {
   try {
-    let dataFin = await Registro.findOne({ deportista_id, Id_Partida }).sort({ fecha: -1 });
+    let dataFin = await Registro.findOne({ deportista_id, Id_Partida , tipo }).sort({ fecha: -1 });
 
     if (!dataFin) {
     
